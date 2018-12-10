@@ -1,8 +1,6 @@
 import socket
 import select
-import time
 import sys
-
 
 def usage():
     print("syntax : http_proxy <port>")
@@ -32,6 +30,7 @@ def main():
             read_socket, write_socket, error_socket = select.select(connection_list, [], [], 10)
 
             for ob in read_socket:
+                
                 # new request
                 if ob == server_socket:
                     (client_socket, address) = server_socket.accept()
@@ -41,9 +40,11 @@ def main():
                 # any data from client
                 else:
                     data = ob.recv(4096).decode()
+
+                    # get http request from web client and send it to web server
                     if data:
                         print("I got the message from client %s." % address[0])
-                        # get request and try to send it to server
+                        
 			# find Host field                        
 			indx = data.index("Host")
                         where = data[indx+6:]
@@ -56,7 +57,8 @@ def main():
                         except:
                             ob.send("you cannot connect web server")
                             break
-
+                        
+                        # send all http responses from web server to web client
                         while True:
                             response = web_socket.recv(65536)
                             if response:
